@@ -37,8 +37,8 @@ def draw_board():
 
 
 #Police du texte
-def draw_text(text, font, text_col, x, y):
-	img = font.render(text, True, text_col)
+def draw_text(text, font, text_color, x, y):
+	img = font.render(text, True, text_color)
 	screen.blit(img, (x, y))
 
 
@@ -50,6 +50,8 @@ class paddle():
 		self.rect = Rect(x, y, 20, 100)
 		self.speed = 5
 		self.ai_speed = 5
+
+
 		
 	#fonction pour déplacer les joueurs
 	def move(self):
@@ -61,7 +63,7 @@ class paddle():
 		if key[pygame.K_DOWN] and self.rect.bottom < screen_height:
 			self.rect.move_ip(0, self.speed)
 
-	def move2(self):
+	def move_first_player(self):
 
 		key = pygame.key.get_pressed()
         
@@ -123,10 +125,12 @@ class ball():
 		return self.winner
 
 	
+
+	#dessin de la balle
 	def draw(self):
 		pygame.draw.circle(screen, white, (self.rect.x + self.ball_rad, self.rect.y + self.ball_rad), self.ball_rad)
 
-	
+	#initialisation de la balle	
 	def reset(self, x, y):
 		self.x = x
 		self.y = y
@@ -147,78 +151,19 @@ pong = ball(screen_width - 60, screen_height // 2 + 50)
 
 
 
-#fonction pour lancer le jeu avec un joueur
+#fonction pour lancer le mode un joueur
 
-def running(live_ball, winner) :
-	player2_score = 0
-	player_score = 0
-	run = True
-	while run:
-
-		fpsClock.tick(fps)
-
-		draw_board()
-		draw_text('Player1: ' + str(player2_score), font, white, 20, 15)
-		draw_text('Player2: ' + str(player_score), font, white, screen_width - 150, 15)
-		
-
-		#creation des joueurs
-		player_paddle.draw()
-		player2_paddle.draw()
-
-		if live_ball == True:
-			winner = pong.move()
-			if winner == 0:
-
-				#creation de la ball
-				pong.draw()
-
-				#deplacer les raquettes
-				player_paddle.move()
-				player2_paddle.move2()
-			else:
-				live_ball = False
-				if winner == 1:
-					player_score += 1
-				elif winner == -1:
-					player2_score += 1
-
-
-		if live_ball == False:
-			if winner == 0:
-				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -100)
-			if winner == 1:
-				draw_text('PLAYER 2 SCORED!', font, white, 150, screen_height // 2 -100)
-				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -50)
-			if winner == -1:
-				draw_text('PLAYER 1 SCORED!', font, white, 200, screen_height // 2 -100)
-				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -50)
-
-
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				run = False
-			
-			if event.type == pygame.MOUSEBUTTONDOWN and live_ball == False:
-				live_ball = True
-				pong.reset(screen_width - 300, screen_height // 2 + 50)
-				player_paddle.draw()
-				player2_paddle.draw()
-			
-		pygame.display.flip()
-
-
-#fonction pour lancer le player1
-
-def running2(live_ball, winner):
+def one_player(live_ball, winner):
 
 	cpu_score = 0
 	player_score = 0
 	run = True
 	while run:
 
-		fpsClock.tick(fps)
+		fpsClock.tick(fps) #vitesse du jeu
 
+
+		#affichage des raquettes sur le terrain
 		draw_board()
 		draw_text('CPU: ' + str(cpu_score), font, white, 20, 15)
 		draw_text('Player1: ' + str(player_score), font, white, screen_width - 150, 15)
@@ -229,6 +174,7 @@ def running2(live_ball, winner):
 
 		if live_ball == True:
 			winner = pong.move()
+			
 			if winner == 0:
 				pong.draw()
 				player_paddle.move()
@@ -240,7 +186,7 @@ def running2(live_ball, winner):
 				elif winner == -1:
 					cpu_score += 1
 
-
+		#lorsque la balle est statique on détermine la valeur du winner 
 		if live_ball == False:
 			if winner == 0:
 				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -100)
@@ -252,7 +198,7 @@ def running2(live_ball, winner):
 				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -50)
 
 
-
+		#Gestion des évenements
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
@@ -265,21 +211,97 @@ def running2(live_ball, winner):
 
 
 
-def start_the_game():
-	running(False, 0)
-
-def start_the_game2():
-	running2(False, 0)
 
 
+#fonction pour lancer le mode deux joueurs
+
+def two_player(live_ball, winner) :
+	player2_score = 0
+	player_score = 0
+	run = True
+	while run:
+
+		fpsClock.tick(fps) # vitesse de jeu
+
+
+		#affichage des raquettes sur le terrain
+		draw_board()
+		draw_text('Player1: ' + str(player2_score), font, white, 20, 15)
+		draw_text('Player2: ' + str(player_score), font, white, screen_width - 150, 15)
+		
+
+		#dessin des joueurs
+		player_paddle.draw()
+		player2_paddle.draw()
+
+
+		if live_ball == True:
+			winner = pong.move()
+			if winner == 0:
+
+				#creation de la ball
+				pong.draw()
+
+				#deplacer les raquettes
+				player_paddle.move()
+				player2_paddle.move2()
+
+
+			else:
+				live_ball = False
+				if winner == 1:
+					player_score += 1
+				elif winner == -1:
+					player2_score += 1
+
+
+		#lorsque la balle est statique on détermine la valeur du winner 
+		if live_ball == False:
+			if winner == 0:
+				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -100)
+			if winner == 1:
+				draw_text('PLAYER 2 SCORED!', font, white, 150, screen_height // 2 -100)
+				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -50)
+			if winner == -1:
+				draw_text('PLAYER 1 SCORED!', font, white, 200, screen_height // 2 -100)
+				draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 -50)
+
+		#Gestion des évenements
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				run = False
+			
+			if event.type == pygame.MOUSEBUTTONDOWN and live_ball == False:
+				live_ball = True
+				pong.reset(screen_width - 300, screen_height // 2 + 50)
+				
+			
+		pygame.display.flip()
+
+
+
+
+#fonction pour lancer les jeux
+
+def start_the_game_one_player():
+	one_player(False, 0)
+
+def start_the_game_two_player():
+	two_player(False, 0)
+
+
+
+#Creation du menu
 
 menu = pygame_menu.Menu('Welcome', 600, 500, theme=pygame_menu.themes.THEME_BLUE)
 
-menu.add.button('One Player', start_the_game2)
-menu.add.button('Two Player', start_the_game)
-
+#on ajoute des boutons qui lancerons notre jeu
+menu.add.button('One Player', start_the_game_one_player)
+menu.add.button('Two Player', start_the_game_two_player)
 menu.add.button('Quit', pygame_menu.events.EXIT)
 
+
+#on affiche tout ça sur l'écran
 menu.mainloop(screen)
 
 
